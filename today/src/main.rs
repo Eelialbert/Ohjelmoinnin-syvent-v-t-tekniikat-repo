@@ -1,4 +1,33 @@
-// Yksinkertainen tapa erotella ja kategorisoida tehtäviä.
+pub mod providers;
+
+use chrono::NaiveDate; 
+
+#[derive(Debug)]
+pub enum EventKind {
+    Singular(NaiveDate),
+}
+
+#[derive(Debug)]
+pub struct Event {
+    pub kind: EventKind,
+    pub description: String,
+    pub category: Category,
+}
+
+impl Event {
+    pub fn new_singular(date: NaiveDate, description: String, category: Category) -> Self {
+        Self {
+            kind: EventKind::Singular(date),
+            description,
+            category,
+        }
+    }
+}
+
+pub trait EventProvider {
+    fn name(&self) -> String;
+    fn get_events(&self, events: &mut Vec<Event>);
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Category {
@@ -29,8 +58,21 @@ impl Category {
     }
 }
 
-fn main() {}
-// Testit on eritelty ettei koko ohjelmaa tarvitse ajaa joka kerta.
+// Pääohjelma, joka hakee tapahtumia tuottajalta ja tulostaa ne
+
+fn main() {
+    use providers::test_provider::TestProvider;
+    let mut tapahtumat: Vec<Event> = Vec::new();
+    let tuottaja = TestProvider;
+    tuottaja.get_events(&mut tapahtumat);
+    println!("--- Tapahtumat tuottajalta: {} ---", tuottaja.name());
+    for tapahtuma in tapahtumat {
+        println!("{:#?}", tapahtuma); 
+    }
+}
+
+// Testit, jotka varmistavat, että kategoriat luodaan oikein ja että tuottaja palauttaa tapahtumia odotetusti.
+
 #[cfg(test)]
 mod tests {
     use super::*;
